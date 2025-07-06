@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt'
 import {connection} from "../../../../database/connection"
 import model from "../../../../model/schemma"
 
@@ -25,10 +26,14 @@ export async function POST(request) {
             )
         }
         
+        // Hash the password before saving
+        const saltRounds = 12
+        const hashedPassword = await bcrypt.hash(password, saltRounds)
+        
         const newUser = new model({
             username,
             email,
-            password
+            password: hashedPassword
         })
         
         await newUser.save()
@@ -46,6 +51,7 @@ export async function POST(request) {
         )
         
     } catch (error) {
+        console.error('Signup error:', error)
         return Response.json(
             { error: "Internal server error" },
             { status: 500 }
