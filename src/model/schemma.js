@@ -10,6 +10,11 @@ const Schema = new mongoose.Schema({
         type: String,
         required: [true, "password is required"],
         minlength: 6
+    },
+    role: {
+        type: String,
+        enum: ['user', 'admin'],
+        default: 'user'
     }
 })
 

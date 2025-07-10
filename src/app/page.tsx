@@ -1,8 +1,11 @@
 import React from 'react'
-
+import WelcomePage from "./(components)/front/wellcome"
 const Page = () => {
   return (
-    <div>Page</div>
+    
+    <div>
+      <WelcomePage/>
+    </div>
   )
 }
 
