@@ -1,8 +1,10 @@
 import React from 'react'
-
+import Check from  "./Check"
 const Valencia = () => {
   return (
-    <div>Valencia</div>
+    <div>
+      <Check/>
+    </div>
   )
 }
 

@@ -92,7 +92,7 @@ export default function WelcomePage() {
 }
 
 const hostels = [
-  { id: 1, name: "Uni Hostel" },
+  { id: 1, name: "izhariUni" },
   { id: 2, name: "Valencia" },
   { id: 3, name: "Hamidiye" },
   { id: 4, name: "Haji Unal" },

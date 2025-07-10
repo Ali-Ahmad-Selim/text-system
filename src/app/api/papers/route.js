@@ -1,25 +1,25 @@
 import { NextResponse } from 'next/server';
 import Test from '../../../model/test';
-import { connection } from "../../../database/connection";
+import mongoose from 'mongoose';
 
-// GET - Fetch all papers
-export async function GET(request) {
+// Connect to MongoDB
+async function connectDB() {
+  if (mongoose.connections[0].readyState) {
+    return;
+  }
   try {
-    // Connect to database
-    await connection();
-    
-    // Fetch all tests from database
-    const tests = await Test.find({}).sort({ createdAt: -1 }); // Sort by newest first
-    
-    return NextResponse.json(
-      { 
-        message: 'Tests fetched successfully',
-        tests: tests,
-        count: tests.length
-      },
-      { status: 200 }
-    );
-    
+    await mongoose.connect(process.env.MONGODB_URI);
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+  }
+}
+
+// GET - Fetch all tests
+export async function GET() {
+  try {
+    await connectDB();
+    const tests = await Test.find({});
+    return NextResponse.json(tests);
   } catch (error) {
     console.error('Error fetching tests:', error);
     return NextResponse.json(
@@ -29,52 +29,41 @@ export async function GET(request) {
   }
 }
 
-// POST - Create new paper
+// POST - Create a new test
 export async function POST(request) {
   try {
-    // Connect to database
-    await connection();
-    
-    // Get data from request body
-    const { title, questions } = await request.json();
+    await connectDB();
+    const body = await request.json();
     
     // Validate required fields
-    if (!title || !questions || !Array.isArray(questions)) {
+    if (!body.title || !body.questions || !Array.isArray(body.questions)) {
       return NextResponse.json(
         { error: 'Title and questions array are required' },
         { status: 400 }
       );
     }
-    
-    // Validate each question has 4 answers
-    for (let i = 0; i < questions.length; i++) {
-      const { question, answers } = questions[i];
-      
-      if (!question || !answers || !Array.isArray(answers) || answers.length !== 4) {
+
+    // Validate questions format (only question text needed now)
+    for (let i = 0; i < body.questions.length; i++) {
+      const question = body.questions[i];
+      if (!question.question || typeof question.question !== 'string') {
         return NextResponse.json(
-          { error: `Question ${i + 1} must have exactly 4 answers` },
+          { error: `Question ${i + 1} must have a question text` },
           { status: 400 }
         );
       }
     }
-    
-    // Create new test
+
+    // Create new test with simplified structure
     const newTest = new Test({
-      title,
-      questions
+      title: body.title,
+      questions: body.questions.map(q => ({
+        question: q.question
+      }))
     });
-    
-    // Save to database
+
     const savedTest = await newTest.save();
-    
-    return NextResponse.json(
-      { 
-        message: 'Test created successfully',
-        test: savedTest 
-      },
-      { status: 201 }
-    );
-    
+    return NextResponse.json(savedTest, { status: 201 });
   } catch (error) {
     console.error('Error creating test:', error);
     return NextResponse.json(
@@ -84,116 +73,57 @@ export async function POST(request) {
   }
 }
 
-// PATCH - Add or delete individual questions
-export async function PATCH(request) {
+// PUT - Update an existing test
+export async function PUT(request) {
   try {
-    // Connect to database
-    await connection();
+    await connectDB();
+    const body = await request.json();
     
-    // Get the URL and extract the ID from query parameters
-    const { searchParams } = new URL(request.url);
-    const testId = searchParams.get('id');
-    const action = searchParams.get('action'); // 'add' or 'delete'
-    
-    // Validate required parameters
-    if (!testId) {
+    if (!body._id) {
       return NextResponse.json(
-        { error: 'Test ID is required' },
+        { error: 'Test ID is required for update' },
         { status: 400 }
       );
     }
-    
-    if (!action || !['add', 'delete'].includes(action)) {
+
+    // Validate required fields
+    if (!body.title || !body.questions || !Array.isArray(body.questions)) {
       return NextResponse.json(
-        { error: 'Action must be either "add" or "delete"' },
+        { error: 'Title and questions array are required' },
         { status: 400 }
       );
     }
-    
-    // Find the test
-    const test = await Test.findById(testId);
-    
-    if (!test) {
+
+    // Validate questions format
+    for (let i = 0; i < body.questions.length; i++) {
+      const question = body.questions[i];
+      if (!question.question || typeof question.question !== 'string') {
+        return NextResponse.json(
+          { error: `Question ${i + 1} must have a question text` },
+          { status: 400 }
+        );
+      }
+    }
+
+    const updatedTest = await Test.findByIdAndUpdate(
+      body._id,
+      {
+        title: body.title,
+        questions: body.questions.map(q => ({
+          question: q.question
+        }))
+      },
+      { new: true }
+    );
+
+    if (!updatedTest) {
       return NextResponse.json(
         { error: 'Test not found' },
         { status: 404 }
       );
     }
-    
-    if (action === 'add') {
-      // Add new question
-      const { question, answers } = await request.json();
-      
-      // Validate new question
-      if (!question || !answers || !Array.isArray(answers) || answers.length !== 4) {
-        return NextResponse.json(
-          { error: 'Question must have exactly 4 answers' },
-          { status: 400 }
-        );
-      }
-      
-      // Add question to the test
-      test.questions.push({ question, answers });
-      
-      // Save updated test
-      const updatedTest = await test.save();
-      
-      return NextResponse.json(
-        { 
-          message: 'Question added successfully',
-          test: updatedTest,
-          addedQuestion: { question, answers }
-        },
-        { status: 200 }
-      );
-      
-    } else if (action === 'delete') {
-      // Delete question by index
-      const questionIndex = searchParams.get('questionIndex');
-      
-      if (questionIndex === null || isNaN(parseInt(questionIndex))) {
-        return NextResponse.json(
-          { error: 'Valid question index is required for deletion' },
-          { status: 400 }
-        );
-      }
-      
-      const index = parseInt(questionIndex);
-      
-      if (index < 0 || index >= test.questions.length) {
-        return NextResponse.json(
-          { error: 'Question index out of range' },
-          { status: 400 }
-        );
-      }
-      
-      // Check if test has at least 2 questions (to prevent deleting all questions)
-      if (test.questions.length <= 1) {
-        return NextResponse.json(
-          { error: 'Cannot delete the last question. Test must have at least one question.' },
-          { status: 400 }
-        );
-      }
-      
-      // Store deleted question for response
-      const deletedQuestion = test.questions[index];
-      
-      // Remove question from array
-      test.questions.splice(index, 1);
-      
-      // Save updated test
-      const updatedTest = await test.save();
-      
-      return NextResponse.json(
-        { 
-          message: 'Question deleted successfully',
-          test: updatedTest,
-          deletedQuestion: deletedQuestion
-        },
-        { status: 200 }
-      );
-    }
-    
+
+    return NextResponse.json(updatedTest);
   } catch (error) {
     console.error('Error updating test:', error);
     return NextResponse.json(
@@ -203,42 +133,30 @@ export async function PATCH(request) {
   }
 }
 
-// DELETE - Delete a paper
+// DELETE - Delete a test
 export async function DELETE(request) {
   try {
-    // Connect to database
-    await connection();
-    
-    // Get the URL and extract the ID from query parameters
+    await connectDB();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    // Validate ID
-    if (!id) {
+    const testId = searchParams.get('id');
+
+    if (!testId) {
       return NextResponse.json(
         { error: 'Test ID is required' },
         { status: 400 }
       );
     }
-    
-    // Find and delete the test
-    const deletedTest = await Test.findByIdAndDelete(id);
-    
+
+    const deletedTest = await Test.findByIdAndDelete(testId);
+
     if (!deletedTest) {
       return NextResponse.json(
         { error: 'Test not found' },
         { status: 404 }
       );
     }
-    
-    return NextResponse.json(
-      { 
-        message: 'Test deleted successfully',
-        deletedTest: deletedTest
-      },
-      { status: 200 }
-    );
-    
+
+    return NextResponse.json({ message: 'Test deleted successfully' });
   } catch (error) {
     console.error('Error deleting test:', error);
     return NextResponse.json(

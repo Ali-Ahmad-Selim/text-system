@@ -1,13 +1,8 @@
 'use client'
 import React, { useState } from 'react'
 
-interface Answer {
-  text: string;
-}
-
 interface Question {
   question: string;
-  answers: string[];
 }
 
 interface TestData {
@@ -22,8 +17,7 @@ const Add = () => {
   });
   
   const [currentQuestion, setCurrentQuestion] = useState({
-    question: '',
-    answers: ['', '', '', '']
+    question: ''
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,22 +30,15 @@ const Add = () => {
     }));
   };
 
-  const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleQuestionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCurrentQuestion(prev => ({
       ...prev,
       question: e.target.value
     }));
   };
 
-  const handleAnswerChange = (index: number, value: string) => {
-    setCurrentQuestion(prev => ({
-      ...prev,
-      answers: prev.answers.map((answer, i) => i === index ? value : answer)
-    }));
-  };
-
   const addQuestion = () => {
-    if (currentQuestion.question.trim() && currentQuestion.answers.every(answer => answer.trim())) {
+    if (currentQuestion.question.trim()) {
       setTestData(prev => ({
         ...prev,
         questions: [...prev.questions, { ...currentQuestion }]
@@ -59,11 +46,14 @@ const Add = () => {
       
       // Reset current question
       setCurrentQuestion({
-        question: '',
-        answers: ['', '', '', '']
+        question: ''
       });
+      setMessage('Question added successfully!');
+      
+      // Clear success message after 2 seconds
+      setTimeout(() => setMessage(''), 2000);
     } else {
-      setMessage('Please fill in the question and all 4 answers');
+      setMessage('Please enter a question');
     }
   };
 
@@ -72,6 +62,8 @@ const Add = () => {
       ...prev,
       questions: prev.questions.filter((_, i) => i !== index)
     }));
+    setMessage('Question removed successfully!');
+    setTimeout(() => setMessage(''), 2000);
   };
 
   const submitTest = async () => {
@@ -105,6 +97,9 @@ const Add = () => {
         setTestData({
           title: '',
           questions: []
+        });
+        setCurrentQuestion({
+          question: ''
         });
       } else {
         setMessage(`Error: ${result.error}`);
@@ -140,33 +135,18 @@ const Add = () => {
           
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2 text-gray-300">Question</label>
-            <input
-              type="text"
+            <textarea
               value={currentQuestion.question}
               onChange={handleQuestionChange}
-              placeholder="Enter your question"
-              className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
+              placeholder="Enter your question here..."
+              rows={4}
+              className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400 resize-vertical"
             />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            {currentQuestion.answers.map((answer, index) => (
-              <div key={index}>
-                <label className="block text-sm font-medium mb-2 text-gray-300">Answer {index + 1}</label>
-                <input
-                  type="text"
-                  value={answer}
-                  onChange={(e) => handleAnswerChange(index, e.target.value)}
-                  placeholder={`Enter answer ${index + 1}`}
-                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
-                />
-              </div>
-            ))}
           </div>
 
           <button
             onClick={addQuestion}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors font-medium"
           >
             Add Question
           </button>
@@ -175,25 +155,25 @@ const Add = () => {
         {/* Questions List */}
         {testData.questions.length > 0 && (
           <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-4 text-white">Questions ({testData.questions.length})</h2>
+            <h2 className="text-xl font-semibold mb-4 text-white">
+              Questions ({testData.questions.length})
+            </h2>
             <div className="space-y-4">
               {testData.questions.map((q, index) => (
                 <div key={index} className="bg-gray-800 p-4 border border-gray-700 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-medium text-white">Q{index + 1}: {q.question}</h3>
+                    <h3 className="font-medium text-white text-lg">
+                      Question {index + 1}
+                    </h3>
                     <button
                       onClick={() => removeQuestion(index)}
-                      className="text-red-400 hover:text-red-300 text-sm transition-colors"
+                      className="text-red-400 hover:text-red-300 px-3 py-1 rounded transition-colors bg-red-900 hover:bg-red-800"
                     >
                       Remove
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
-                    {q.answers.map((answer, ansIndex) => (
-                      <div key={ansIndex}>
-                        {String.fromCharCode(65 + ansIndex)}) {answer}
-                      </div>
-                    ))}
+                  <div className="text-gray-300 bg-gray-700 p-3 rounded border-l-4 border-blue-500">
+                    {q.question}
                   </div>
                 </div>
               ))}
@@ -206,15 +186,16 @@ const Add = () => {
           <button
             onClick={submitTest}
             disabled={isSubmitting}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-3 rounded-lg transition-colors"
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-3 rounded-lg transition-colors font-medium"
           >
             {isSubmitting ? 'Creating Test...' : 'Create Test'}
           </button>
           
           {message && (
-            <div className={`p-3 rounded-lg ${message.includes('Error') || message.includes('Failed') || message.includes('Please') 
-              ? 'bg-red-900 text-red-300 border border-red-700' 
-              : 'bg-green-900 text-green-300 border border-green-700'
+            <div className={`p-3 rounded-lg max-w-md ${
+              message.includes('Error') || message.includes('Failed') || message.includes('Please') 
+                ? 'bg-red-900 text-red-300 border border-red-700' 
+                : 'bg-green-900 text-green-300 border border-green-700'
             }`}>
               {message}
             </div>

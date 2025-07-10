@@ -33,7 +33,7 @@ const Page = () => {
   const renderCenterComponent = () => {
 
     switch(center) {
-      case 'Uni Hostel':
+      case 'izhariUni':
         return <Uni />;
       case 'Valencia':
         return <Valencia />;

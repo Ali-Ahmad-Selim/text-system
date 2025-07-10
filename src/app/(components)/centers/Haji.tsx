@@ -1,8 +1,10 @@
 import React from 'react'
-
+import Check from  "./Check"
 const Haji = () => {
   return (
-    <div>Haji</div>
+    <div>
+      <Check/>
+    </div>
   )
 }
 

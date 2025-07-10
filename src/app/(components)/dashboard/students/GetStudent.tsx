@@ -11,6 +11,8 @@ interface Student {
 
 const GetStudent = () => {
   const [students, setStudents] = useState<Student[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
@@ -19,6 +21,30 @@ const GetStudent = () => {
     rollNumber: '',
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Filter students based on search term
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredStudents(students);
+    } else {
+      const filtered = students.filter(student =>
+        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredStudents(filtered);
+    }
+  }, [students, searchTerm]);
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchTerm('');
+  };
 
   // Fetch all students
   const fetchStudents = async () => {
@@ -143,6 +169,42 @@ const GetStudent = () => {
         </button>
       </div>
 
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by name, student ID, or roll number..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="w-full px-4 py-3 pl-10 pr-10 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          {/* Search Icon */}
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          {/* Clear Button */}
+          {searchTerm && (
+            <button
+              onClick={clearSearch}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        {/* Search Results Info */}
+        {searchTerm && (
+          <div className="mt-2 text-sm text-gray-400">
+            Found {filteredStudents.length} student{filteredStudents.length !== 1 ? 's' : ''} matching "{searchTerm}"
+          </div>
+        )}
+      </div>
+
       {message && (
         <div
           className={`mb-4 p-3 rounded ${
@@ -155,13 +217,16 @@ const GetStudent = () => {
         </div>
       )}
 
-      {students.length === 0 ? (
+      {filteredStudents.length === 0 ? (
         <div className="text-center py-8 text-gray-400">
-          No students found. Add some students to get started.
+          {searchTerm ? 
+            `No students found matching "${searchTerm}". Try a different search term.` : 
+            'No students found. Add some students to get started.'
+          }
         </div>
       ) : (
         <div className="grid gap-4">
-          {students.map(student => (
+          {filteredStudents.map(student => (
             <div key={student._id} className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg">
               <div className="flex justify-between items-start mb-3">
                 <div>

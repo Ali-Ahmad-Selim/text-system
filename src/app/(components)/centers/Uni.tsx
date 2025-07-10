@@ -1,8 +1,11 @@
 import React from 'react'
-
+import Check from  "./Check"
 const Uni = () => {
   return (
-    <div>Uni</div>
+
+    <div>
+      <Check/>
+    </div>
   )
 }
 
