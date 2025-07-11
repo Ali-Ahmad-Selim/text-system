@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface Student {
   _id: string;
@@ -32,22 +32,30 @@ const Check = () => {
       const response = await fetch('/api/students');
       
       if (response.ok) {
-        const students: Student[] = await response.json();
+        const result = await response.json();
         
-        // Find student by exact name match (case-insensitive)
-        const student = students.find(student => 
-          student.name.toLowerCase().trim() === searchName.toLowerCase().trim()
-        );
+        // ✅ Handle new API response format
+        if (result.success && result.data) {
+          const students: Student[] = result.data;
+          
+          // Find student by exact name match (case-insensitive)
+          const student = students.find(student => 
+            student.name.toLowerCase().trim() === searchName.toLowerCase().trim()
+          );
 
-        if (student) {
-          setFoundStudent(student);
-          setShowRollNumberInput(true);
-          setMessage({ type: 'success', text: `Student "${student.name}" found! Please enter your roll number to continue.` });
+          if (student) {
+            setFoundStudent(student);
+            setShowRollNumberInput(true);
+            setMessage({ type: 'success', text: `Student "${student.name}" found! Please enter your roll number to continue.` });
+          } else {
+            setMessage({ type: 'error', text: `Student "${searchName}" does not exist` });
+          }
         } else {
-          setMessage({ type: 'error', text: `Student "${searchName}" does not exist` });
+          setMessage({ type: 'error', text: result.error || 'Failed to fetch students' });
         }
       } else {
-        setMessage({ type: 'error', text: 'Failed to check student' });
+        const errorResult = await response.json();
+        setMessage({ type: 'error', text: errorResult.error || 'Failed to check student' });
       }
     } catch (error) {
       console.error('Error checking student:', error);
@@ -113,109 +121,125 @@ const Check = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow-lg">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Student Verification</h2>
-        
-        {/* Search Input */}
-        <div className="mb-6">
-          <div className="flex gap-3">
-            <input
-              type="text"
-              placeholder="Enter exact student name..."
-              value={searchName}
-              onChange={(e) => setSearchName(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              disabled={loading || showRollNumberInput}
-            />
-            
-            <button
-              onClick={checkStudent}
-              disabled={loading || showRollNumberInput}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-                loading || showRollNumberInput
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {loading ? 'Checking...' : 'Check'}
-            </button>
-            
-            {(searchName || showRollNumberInput) && (
-              <button
-                onClick={clearSearch}
-                className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Clear
-              </button>
-            )}
-          </div>
+    <div className="min-h-screen bg-gray-900 py-4 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl xl:max-w-2xl mx-auto">
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 sm:p-6 lg:p-8 shadow-lg">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-4 sm:mb-6 text-center">
+            Student Verification
+          </h2>
           
-          {/* Helper text for exact matching */}
-          <p className="text-sm text-gray-400 mt-2">
-            Note: Enter the complete and exact student name (case doesn't matter)
-          </p>
-        </div>
-
-        {/* Roll Number Input (shown after student is found) */}
-        {showRollNumberInput && (
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Enter Roll Number for Verification
-            </label>
-            <div className="flex gap-3">
+          {/* Search Input */}
+          <div className="mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
-                placeholder="Enter your roll number..."
-                value={enteredRollNumber}
-                onChange={(e) => setEnteredRollNumber(e.target.value)}
+                placeholder="Enter exact student name..."
+                value={searchName}
+                onChange={(e) => setSearchName(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                disabled={loading || showRollNumberInput}
               />
               
-              <button
-                onClick={verifyRollNumber}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors"
-              >
-                Verify
-              </button>
+              <div className="flex gap-2 sm:gap-3">
+                <button
+                  onClick={checkStudent}
+                  disabled={loading || showRollNumberInput}
+                  className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-colors text-sm sm:text-base ${
+                    loading || showRollNumberInput
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {loading ? 'Checking...' : 'Check'}
+                </button>
+                
+                {(searchName || showRollNumberInput) && (
+                  <button
+                    onClick={clearSearch}
+                    className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
+            
+            {/* Helper text for exact matching */}
+            <p className="text-xs sm:text-sm text-gray-400 mt-2">
+              Note: Enter the complete and exact student name (case doesn't matter)
+            </p>
           </div>
-        )}
 
-        {/* Result Message */}
-        {message && (
-          <div
-            className={`p-4 rounded-lg border text-center ${
-              message.type === 'success'
-                ? 'bg-green-900 text-green-200 border-green-600'
-                : 'bg-red-900 text-red-200 border-red-600'
-            }`}
-          >
-            <div className="flex items-center justify-center gap-2">
-              {message.type === 'success' ? (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-              <span className="text-lg font-medium">{message.text}</span>
+          {/* Roll Number Input (shown after student is found) */}
+          {showRollNumberInput && (
+            <div className="mb-4 sm:mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Enter Roll Number for Verification
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Enter your roll number..."
+                  value={enteredRollNumber}
+                  onChange={(e) => setEnteredRollNumber(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
+                />
+                
+                <button
+                  onClick={verifyRollNumber}
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors text-sm sm:text-base"
+                >
+                  Verify
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Student Info Display (optional) */}
-        {foundStudent && (
-          <div className="mt-4 p-4 bg-gray-700 rounded-lg border border-gray-600">
-            <h3 className="text-lg font-semibold text-white mb-2">Student Found:</h3>
-            <p className="text-gray-300">Name: {foundStudent.name}</p>
-            <p className="text-gray-300">Student ID: {foundStudent.studentId}</p>
-          </div>
-        )}
+          {/* Result Message */}
+          {message && (
+            <div
+              className={`p-3 sm:p-4 rounded-lg border text-center mb-4 sm:mb-6 ${
+                message.type === 'success'
+                  ? 'bg-green-900 text-green-200 border-green-600'
+                  : 'bg-red-900 text-red-200 border-red-600'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                {message.type === 'success' ? (
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                )}
+                <span className="text-sm sm:text-base lg:text-lg font-medium break-words">
+                  {message.text}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Student Info Display */}
+          {foundStudent && (
+            <div className="mt-4 p-3 sm:p-4 bg-gray-700 rounded-lg border border-gray-600">
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-2">
+                Student Found:
+              </h3>
+              <div className="space-y-1 text-sm sm:text-base">
+                <p className="text-gray-300">
+                  <span className="font-medium">Name:</span> {foundStudent.name}
+                </p>
+                <p className="text-gray-300">
+                  <span className="font-medium">Student ID:</span> {foundStudent.studentId}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

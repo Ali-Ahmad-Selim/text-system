@@ -54,11 +54,19 @@ const AllPapers = () => {
     try {
       setLoading(true);
       const response = await fetch('/api/papers');
+      
       if (response.ok) {
-        const data = await response.json();
-        setTests(data);
+        const result = await response.json();
+        
+        // ✅ Handle new API response format
+        if (result.success && result.data) {
+          setTests(result.data);
+        } else {
+          setMessage({ type: 'error', text: result.error || 'Failed to fetch tests' });
+        }
       } else {
-        setMessage({ type: 'error', text: 'Failed to fetch tests' });
+        const errorResult = await response.json();
+        setMessage({ type: 'error', text: errorResult.error || 'Failed to fetch tests' });
       }
     } catch (error) {
       console.error('Error fetching tests:', error);
@@ -71,6 +79,7 @@ const AllPapers = () => {
   // Delete test
   const handleDelete = async (testId: string) => {
     if (!confirm('Are you sure you want to delete this test?')) return;
+    
     try {
       setDeleteLoading(testId);
       const response = await fetch(`/api/papers?id=${testId}`, {
@@ -78,11 +87,18 @@ const AllPapers = () => {
       });
 
       if (response.ok) {
-        setTests(prev => prev.filter(test => test._id !== testId));
-        setMessage({ type: 'success', text: 'Test deleted successfully' });
-      } else {
         const result = await response.json();
-        setMessage({ type: 'error', text: result.error || 'Failed to delete test' });
+        
+        // ✅ Handle new API response format
+        if (result.success) {
+          setTests(prev => prev.filter(test => test._id !== testId));
+          setMessage({ type: 'success', text: result.message || 'Test deleted successfully' });
+        } else {
+          setMessage({ type: 'error', text: result.error || 'Failed to delete test' });
+        }
+      } else {
+        const errorResult = await response.json();
+        setMessage({ type: 'error', text: errorResult.error || 'Failed to delete test' });
       }
     } catch (error) {
       console.error('Error deleting test:', error);
@@ -163,17 +179,23 @@ const AllPapers = () => {
       });
 
       if (response.ok) {
-        const updatedTest = await response.json();
-        setTests(prev =>
-          prev.map(test =>
-            test._id === editingTest._id ? updatedTest : test
-          )
-        );
-        setMessage({ type: 'success', text: 'Test updated successfully' });
-        handleCancelEdit();
-      } else {
         const result = await response.json();
-        setMessage({ type: 'error', text: result.error || 'Failed to update test' });
+        
+        // ✅ Handle new API response format
+        if (result.success && result.data) {
+          setTests(prev =>
+            prev.map(test =>
+              test._id === editingTest._id ? result.data : test
+            )
+          );
+          setMessage({ type: 'success', text: 'Test updated successfully' });
+          handleCancelEdit();
+        } else {
+          setMessage({ type: 'error', text: result.error || 'Failed to update test' });
+        }
+      } else {
+        const errorResult = await response.json();
+        setMessage({ type: 'error', text: errorResult.error || 'Failed to update test' });
       }
     } catch (error) {
       console.error('Error updating test:', error);
@@ -358,7 +380,7 @@ const AllPapers = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <textarea
+                    <textarea
                     value={currentQuestion}
                     onChange={(e) => setCurrentQuestion(e.target.value)}
                     placeholder="Add new question..."

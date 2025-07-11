@@ -51,11 +51,19 @@ const GetStudent = () => {
     try {
       setLoading(true);
       const response = await fetch('/api/students');
+      
       if (response.ok) {
-        const data = await response.json();
-        setStudents(data);
+        const result = await response.json();
+        
+        // ✅ Handle new API response format
+        if (result.success && result.data) {
+          setStudents(result.data);
+        } else {
+          setMessage({ type: 'error', text: result.error || 'Failed to fetch students' });
+        }
       } else {
-        setMessage({ type: 'error', text: 'Failed to fetch students' });
+        const errorResult = await response.json();
+        setMessage({ type: 'error', text: errorResult.error || 'Failed to fetch students' });
       }
     } catch (error) {
       console.error('Error fetching students:', error);
@@ -68,6 +76,7 @@ const GetStudent = () => {
   // Delete student
   const handleDelete = async (studentId: string) => {
     if (!confirm('Are you sure you want to delete this student?')) return;
+    
     try {
       setDeleteLoading(studentId);
       const response = await fetch(`/api/students?studentId=${studentId}`, {
@@ -75,11 +84,18 @@ const GetStudent = () => {
       });
 
       if (response.ok) {
-        setStudents(prev => prev.filter(student => student.studentId !== studentId));
-        setMessage({ type: 'success', text: 'Student deleted successfully' });
-      } else {
         const result = await response.json();
-        setMessage({ type: 'error', text: result.error || 'Failed to delete student' });
+        
+        // ✅ Handle new API response format
+        if (result.success) {
+          setStudents(prev => prev.filter(student => student.studentId !== studentId));
+          setMessage({ type: 'success', text: result.message || 'Student deleted successfully' });
+        } else {
+          setMessage({ type: 'error', text: result.error || 'Failed to delete student' });
+        }
+      } else {
+        const errorResult = await response.json();
+        setMessage({ type: 'error', text: errorResult.error || 'Failed to delete student' });
       }
     } catch (error) {
       console.error('Error deleting student:', error);
@@ -120,17 +136,23 @@ const GetStudent = () => {
       });
 
       if (response.ok) {
-        const updatedStudent = await response.json();
-        setStudents(prev =>
-          prev.map(student =>
-            student.studentId === editingStudent.studentId ? updatedStudent : student
-          )
-        );
-        setMessage({ type: 'success', text: 'Student updated successfully' });
-        handleCancelEdit();
-      } else {
         const result = await response.json();
-        setMessage({ type: 'error', text: result.error || 'Failed to update student' });
+        
+        // ✅ Handle new API response format
+        if (result.success && result.data) {
+          setStudents(prev =>
+            prev.map(student =>
+              student.studentId === editingStudent.studentId ? result.data : student
+            )
+          );
+          setMessage({ type: 'success', text: 'Student updated successfully' });
+          handleCancelEdit();
+        } else {
+          setMessage({ type: 'error', text: result.error || 'Failed to update student' });
+        }
+      } else {
+        const errorResult = await response.json();
+        setMessage({ type: 'error', text: errorResult.error || 'Failed to update student' });
       }
     } catch (error) {
       console.error('Error updating student:', error);
