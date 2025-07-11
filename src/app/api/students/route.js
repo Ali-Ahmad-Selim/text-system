@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import Student from '../../../model/student.js';
-import connection from "../../../database/connection"
 
 import mongoose from 'mongoose';
 
-connection()
+
 // Connect to MongoDB (you might want to move this to a separate utility file)
 async function connectDB() {
   if (mongoose.connections[0].readyState) {
