@@ -2,20 +2,10 @@ import { NextResponse } from 'next/server';
 import Student from '../../../model/student.js';
 import connection from "../../../database/connection";
 
-// Ensure database connection
-async function ensureConnection() {
-  try {
-    await connection();
-  } catch (error) {
-    console.error('Database connection failed:', error);
-    throw new Error('Database connection failed');
-  }
-}
-
 // GET - Retrieve all students or a specific student by ID
 export async function GET(request) {
   try {
-    await ensureConnection();
+    await connection();
     
     const { searchParams } = new URL(request.url);
     const studentId = searchParams.get('studentId');
@@ -46,7 +36,7 @@ export async function GET(request) {
 // POST - Create a new student
 export async function POST(request) {
   try {
-    await ensureConnection();
+    await connection();
     
     const body = await request.json();
     const { studentId, name, rollNumber } = body;
@@ -103,7 +93,7 @@ export async function POST(request) {
 // PATCH - Update an existing student
 export async function PATCH(request) {
   try {
-    await ensureConnection();
+    await connection();
     
     const body = await request.json();
     const { studentId, name, rollNumber, history } = body;
@@ -155,7 +145,7 @@ export async function PATCH(request) {
 // DELETE - Delete a student
 export async function DELETE(request) {
   try {
-    await ensureConnection();
+    await connection();
     
     const { searchParams } = new URL(request.url);
     const studentId = searchParams.get('studentId');

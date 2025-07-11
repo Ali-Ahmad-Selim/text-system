@@ -1,33 +1,19 @@
 import { NextResponse } from 'next/server';
 import Test from '../../../model/test';
-import mongoose from 'mongoose';
-import connection from "../../../database/connection"
-
-
-connection()
-
-// Connect to MongoDB
-async function connectDB() {
-  if (mongoose.connections[0].readyState) {
-    return;
-  }
-  try {
-    await mongoose.connect(process.env.MONGODB_URI);
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-  }
-}
+import connection from "../../../database/connection";
 
 // GET - Fetch all tests
 export async function GET() {
   try {
-    await connectDB();
-    const tests = await Test.find({});
-    return NextResponse.json(tests);
+    await connection();
+    
+    const tests = await Test.find({}).lean();
+    return NextResponse.json({ success: true, data: tests });
+    
   } catch (error) {
-    console.error('Error fetching tests:', error);
+    console.error('GET Error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch tests' },
+      { success: false, error: 'Failed to fetch tests' },
       { status: 500 }
     );
   }
@@ -36,64 +22,14 @@ export async function GET() {
 // POST - Create a new test
 export async function POST(request) {
   try {
-    await connectDB();
+    await connection();
+    
     const body = await request.json();
     
     // Validate required fields
     if (!body.title || !body.questions || !Array.isArray(body.questions)) {
       return NextResponse.json(
-        { error: 'Title and questions array are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate questions format (only question text needed now)
-    for (let i = 0; i < body.questions.length; i++) {
-      const question = body.questions[i];
-      if (!question.question || typeof question.question !== 'string') {
-        return NextResponse.json(
-          { error: `Question ${i + 1} must have a question text` },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Create new test with simplified structure
-    const newTest = new Test({
-      title: body.title,
-      questions: body.questions.map(q => ({
-        question: q.question
-      }))
-    });
-
-    const savedTest = await newTest.save();
-    return NextResponse.json(savedTest, { status: 201 });
-  } catch (error) {
-    console.error('Error creating test:', error);
-    return NextResponse.json(
-      { error: 'Failed to create test' },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT - Update an existing test
-export async function PUT(request) {
-  try {
-    await connectDB();
-    const body = await request.json();
-    
-    if (!body._id) {
-      return NextResponse.json(
-        { error: 'Test ID is required for update' },
-        { status: 400 }
-      );
-    }
-
-    // Validate required fields
-    if (!body.title || !body.questions || !Array.isArray(body.questions)) {
-      return NextResponse.json(
-        { error: 'Title and questions array are required' },
+        { success: false, error: 'Title and questions array are required' },
         { status: 400 }
       );
     }
@@ -103,35 +39,95 @@ export async function PUT(request) {
       const question = body.questions[i];
       if (!question.question || typeof question.question !== 'string') {
         return NextResponse.json(
-          { error: `Question ${i + 1} must have a question text` },
+          { success: false, error: `Question ${i + 1} must have a question text` },
           { status: 400 }
         );
       }
     }
 
+    // Create new test with simplified structure
+    const testData = {
+      title: body.title.trim(),
+      questions: body.questions.map(q => ({
+        question: q.question.trim()
+      }))
+    };
+
+    const newTest = await Test.create(testData);
+    
+    return NextResponse.json(
+      { success: true, data: newTest },
+      { status: 201 }
+    );
+    
+  } catch (error) {
+    console.error('POST Error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to create test' },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT - Update an existing test
+export async function PUT(request) {
+  try {
+    await connection();
+    
+    const body = await request.json();
+    
+    if (!body._id) {
+      return NextResponse.json(
+        { success: false, error: 'Test ID is required for update' },
+        { status: 400 }
+      );
+    }
+
+    // Validate required fields
+    if (!body.title || !body.questions || !Array.isArray(body.questions)) {
+      return NextResponse.json(
+        { success: false, error: 'Title and questions array are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate questions format
+    for (let i = 0; i < body.questions.length; i++) {
+      const question = body.questions[i];
+      if (!question.question || typeof question.question !== 'string') {
+        return NextResponse.json(
+          { success: false, error: `Question ${i + 1} must have a question text` },
+          { status: 400 }
+        );
+      }
+    }
+
+    const updateData = {
+      title: body.title.trim(),
+      questions: body.questions.map(q => ({
+        question: q.question.trim()
+      }))
+    };
+
     const updatedTest = await Test.findByIdAndUpdate(
       body._id,
-      {
-        title: body.title,
-        questions: body.questions.map(q => ({
-          question: q.question
-        }))
-      },
-      { new: true }
+      updateData,
+      { new: true, runValidators: true }
     );
 
     if (!updatedTest) {
       return NextResponse.json(
-        { error: 'Test not found' },
+        { success: false, error: 'Test not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(updatedTest);
+    return NextResponse.json({ success: true, data: updatedTest });
+    
   } catch (error) {
-    console.error('Error updating test:', error);
+    console.error('PUT Error:', error);
     return NextResponse.json(
-      { error: 'Failed to update test' },
+      { success: false, error: 'Failed to update test' },
       { status: 500 }
     );
   }
@@ -140,13 +136,14 @@ export async function PUT(request) {
 // DELETE - Delete a test
 export async function DELETE(request) {
   try {
-    await connectDB();
+    await connection();
+    
     const { searchParams } = new URL(request.url);
     const testId = searchParams.get('id');
 
     if (!testId) {
       return NextResponse.json(
-        { error: 'Test ID is required' },
+        { success: false, error: 'Test ID is required' },
         { status: 400 }
       );
     }
@@ -155,16 +152,21 @@ export async function DELETE(request) {
 
     if (!deletedTest) {
       return NextResponse.json(
-        { error: 'Test not found' },
+        { success: false, error: 'Test not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ message: 'Test deleted successfully' });
+    return NextResponse.json({
+      success: true,
+      message: 'Test deleted successfully',
+      data: deletedTest
+    });
+    
   } catch (error) {
-    console.error('Error deleting test:', error);
+    console.error('DELETE Error:', error);
     return NextResponse.json(
-      { error: 'Failed to delete test' },
+      { success: false, error: 'Failed to delete test' },
       { status: 500 }
     );
   }
