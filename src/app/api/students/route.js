@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Student from '../../../model/student.js';
-import {connection} from "../../../database/connection"
+import connection from "../../../database/connection"
 
 import mongoose from 'mongoose';
 

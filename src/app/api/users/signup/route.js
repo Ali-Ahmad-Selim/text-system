@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import {connection} from "../../../../database/connection"
+import connection from "../../../../database/connection"
 import model from "../../../../model/schemma"
 
 connection()

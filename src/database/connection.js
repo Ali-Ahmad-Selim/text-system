@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
 
-export function connection() {
+ function connection() {
     const mongo = process.env.MONGO_URI
     
     if (!mongo) {
@@ -17,3 +17,5 @@ export function connection() {
         .then(() => console.log("Connection is successful"))
         .catch((error) => console.log("Connection is unsuccessful:", error))
 }
+
+export default connection
