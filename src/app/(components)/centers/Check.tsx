@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {connection} from "../../../database/connection"
 
 interface Student {
   _id: string;
@@ -10,7 +9,6 @@ interface Student {
   rollNumber: string;
 }
 
-connection()
 const Check = () => {
   const [searchName, setSearchName] = useState('');
   const [loading, setLoading] = useState(false);

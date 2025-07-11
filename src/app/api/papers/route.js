@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import Test from '../../../model/test';
 import mongoose from 'mongoose';
+import {connection} from "../../../../database/connection"
+
+
+connection()
 
 // Connect to MongoDB
 async function connectDB() {
