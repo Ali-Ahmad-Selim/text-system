@@ -27,7 +27,7 @@ const studentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  rollNumber: {
+  group: {
     type: String,
     required: true,
   },

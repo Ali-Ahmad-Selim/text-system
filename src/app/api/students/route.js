@@ -39,12 +39,12 @@ export async function POST(request) {
     await connection();
     
     const body = await request.json();
-    const { studentId, name, rollNumber } = body;
+    const { studentId, name, group } = body;
     
     // Validate required fields
-    if (!studentId || !name || !rollNumber) {
+    if (!studentId || !name || !group) {
       return NextResponse.json(
-        { success: false, error: 'studentId, name, and rollNumber are required' },
+        { success: false, error: 'studentId, name, and group are required' },
         { status: 400 }
       );
     }
@@ -62,7 +62,7 @@ export async function POST(request) {
     const studentData = {
       studentId: studentId.trim(),
       name: name.trim(),
-      rollNumber: rollNumber.trim(),
+      group: group.trim(),
       history: []
     };
     
@@ -96,7 +96,7 @@ export async function PATCH(request) {
     await connection();
     
     const body = await request.json();
-    const { studentId, name, rollNumber, history } = body;
+    const { studentId, name, group, history } = body;
     
     if (!studentId) {
       return NextResponse.json(
@@ -108,7 +108,7 @@ export async function PATCH(request) {
     // Build update object
     const updateData = {};
     if (name) updateData.name = name.trim();
-    if (rollNumber) updateData.rollNumber = rollNumber.trim();
+    if (group) updateData.group = group.trim();
     if (Array.isArray(history)) updateData.history = history;
     
     if (Object.keys(updateData).length === 0) {

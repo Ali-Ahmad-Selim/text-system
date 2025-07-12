@@ -6,7 +6,7 @@ interface Student {
   _id: string;
   studentId: string;
   name: string;
-  rollNumber: string;
+  group: string;
 }
 
 const GetStudent = () => {
@@ -18,7 +18,7 @@ const GetStudent = () => {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [editFormData, setEditFormData] = useState({
     name: '',
-    rollNumber: '',
+    group: '',
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -30,7 +30,7 @@ const GetStudent = () => {
       const filtered = students.filter(student =>
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase())
+        student.group.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredStudents(filtered);
     }
@@ -110,13 +110,13 @@ const GetStudent = () => {
     setEditingStudent(student);
     setEditFormData({
       name: student.name,
-      rollNumber: student.rollNumber,
+      group: student.group,
     });
   };
 
   const handleCancelEdit = () => {
     setEditingStudent(null);
-    setEditFormData({ name: '', rollNumber: '' });
+    setEditFormData({ name: '', group: '' });
   };
 
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -254,7 +254,7 @@ const GetStudent = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-white">{student.name}</h3>
                   <p className="text-sm text-gray-300">ID: {student.studentId}</p>
-                  <p className="text-sm text-gray-300">Roll: {student.rollNumber}</p>
+                  <p className="text-sm text-gray-300">Roll: {student.group}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -315,8 +315,8 @@ const GetStudent = () => {
                 <label className="block text-sm font-medium text-gray-300 mb-1">Roll Number *</label>
                 <input
                   type="text"
-                  name="rollNumber"
-                  value={editFormData.rollNumber}
+                  name="group"
+                  value={editFormData.group}
                   onChange={handleEditInputChange}
                   required
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white"

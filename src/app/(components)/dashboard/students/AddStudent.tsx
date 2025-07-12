@@ -5,14 +5,14 @@ import React, { useState } from 'react';
 interface StudentData {
   studentId: string;
   name: string;
-  rollNumber: string;
+  group: string;
 }
 
 const AddStudent = () => {
   const [formData, setFormData] = useState({
     studentId: '',
     name: '',
-    rollNumber: '',
+    group: '',
   });
   
   const [loading, setLoading] = useState(false);
@@ -54,7 +54,7 @@ const AddStudent = () => {
         setFormData({
           studentId: '',
           name: '',
-          rollNumber: '',
+          group: '',
         });
       } else {
         setMessage({ type: 'error', text: result.error || 'Failed to add student' });
@@ -118,14 +118,14 @@ const AddStudent = () => {
 
         {/* Roll Number */}
         <div>
-          <label htmlFor="rollNumber" className="block text-sm font-medium text-gray-300 mb-1">
+          <label htmlFor="group" className="block text-sm font-medium text-gray-300 mb-1">
             Roll Number *
           </label>
           <input
             type="text"
-            id="rollNumber"
-            name="rollNumber"
-            value={formData.rollNumber}
+            id="group"
+            name="group"
+            value={formData.group}
             onChange={handleInputChange}
             required
             className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
