@@ -202,15 +202,7 @@ const Add = () => {
           )}
         </div>
 
-        {/* Preview JSON */}
-        {testData.questions.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4 text-white">Preview (JSON Format)</h2>
-            <pre className="bg-gray-800 p-4 rounded-lg overflow-x-auto text-sm text-gray-300 border border-gray-700">
-              {JSON.stringify(testData, null, 2)}
-            </pre>
-          </div>
-        )}
+     
       </div>
     </div>
   );
