@@ -6,7 +6,7 @@ interface Student {
   _id: string;
   studentId: string;
   name: string;
-  rollNumber: string;
+  group: string;
 }
 
 const Check = () => {
@@ -14,8 +14,8 @@ const Check = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [foundStudent, setFoundStudent] = useState<Student | null>(null);
-  const [showRollNumberInput, setShowRollNumberInput] = useState(false);
-  const [enteredRollNumber, setEnteredRollNumber] = useState('');
+  const [showgroupInput, setShowgroupInput] = useState(false);
+  const [enteredgroup, setEnteredgroup] = useState('');
 
   const checkStudent = async () => {
     if (!searchName.trim()) {
@@ -26,7 +26,7 @@ const Check = () => {
     setLoading(true);
     setMessage(null);
     setFoundStudent(null);
-    setShowRollNumberInput(false);
+    setShowgroupInput(false);
 
     try {
       const response = await fetch('/api/students');
@@ -45,7 +45,7 @@ const Check = () => {
 
           if (student) {
             setFoundStudent(student);
-            setShowRollNumberInput(true);
+            setShowgroupInput(true);
             setMessage({ type: 'success', text: `Student "${student.name}" found! Please enter your roll number to continue.` });
           } else {
             setMessage({ type: 'error', text: `Student "${searchName}" does not exist` });
@@ -65,8 +65,8 @@ const Check = () => {
     }
   };
 
-  const verifyRollNumber = () => {
-    if (!foundStudent || !enteredRollNumber.trim()) {
+  const verifygroup = () => {
+    if (!foundStudent || !enteredgroup.trim()) {
       setMessage({ type: 'error', text: 'Please enter your roll number' });
       return;
     }
@@ -81,9 +81,9 @@ const Check = () => {
       }
 
       // Check if entered roll number matches the found student's roll number
-      if (foundStudent.rollNumber === enteredRollNumber.trim()) {
+      if (foundStudent.group === enteredgroup.trim()) {
         // Also check if it matches the saved center (assuming savedCenter contains roll number)
-        if (savedCenter === enteredRollNumber.trim()) {
+        if (savedCenter === enteredgroup.trim()) {
           setMessage({ type: 'success', text: 'Verification successful! Redirecting to papers...' });
           
           // Redirect to papers page after a short delay
@@ -104,8 +104,8 @@ const Check = () => {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      if (showRollNumberInput) {
-        verifyRollNumber();
+      if (showgroupInput) {
+        verifygroup();
       } else {
         checkStudent();
       }
@@ -114,10 +114,10 @@ const Check = () => {
 
   const clearSearch = () => {
     setSearchName('');
-    setEnteredRollNumber('');
+    setEnteredgroup('');
     setMessage(null);
     setFoundStudent(null);
-    setShowRollNumberInput(false);
+    setShowgroupInput(false);
   };
 
   return (
@@ -138,15 +138,15 @@ const Check = () => {
                 onChange={(e) => setSearchName(e.target.value)}
                 onKeyPress={handleKeyPress}
                 className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                disabled={loading || showRollNumberInput}
+                disabled={loading || showgroupInput}
               />
               
               <div className="flex gap-2 sm:gap-3">
                 <button
                   onClick={checkStudent}
-                  disabled={loading || showRollNumberInput}
+                  disabled={loading || showgroupInput}
                   className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-colors text-sm sm:text-base ${
-                    loading || showRollNumberInput
+                    loading || showgroupInput
                       ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
@@ -154,7 +154,7 @@ const Check = () => {
                   {loading ? 'Checking...' : 'Check'}
                 </button>
                 
-                {(searchName || showRollNumberInput) && (
+                {(searchName || showgroupInput) && (
                   <button
                     onClick={clearSearch}
                     className="flex-1 sm:flex-none px-3 sm:px-4 py-2 sm:py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
@@ -172,7 +172,7 @@ const Check = () => {
           </div>
 
           {/* Roll Number Input (shown after student is found) */}
-          {showRollNumberInput && (
+          {showgroupInput && (
             <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Enter Roll Number for Verification
@@ -181,14 +181,14 @@ const Check = () => {
                 <input
                   type="text"
                   placeholder="Enter your roll number..."
-                  value={enteredRollNumber}
-                  onChange={(e) => setEnteredRollNumber(e.target.value)}
+                  value={enteredgroup}
+                  onChange={(e) => setEnteredgroup(e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="flex-1 px-3 sm:px-4 py-2 sm:py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                 />
                 
                 <button
-                  onClick={verifyRollNumber}
+                  onClick={verifygroup}
                   className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors text-sm sm:text-base"
                 >
                   Verify
