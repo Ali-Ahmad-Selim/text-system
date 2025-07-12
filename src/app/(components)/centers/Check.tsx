@@ -175,7 +175,7 @@ const Check = () => {
           {showgroupInput && (
             <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Enter Roll Number for Verification
+                Enter group name for verification
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
