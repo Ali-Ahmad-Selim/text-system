@@ -1,12 +1,11 @@
 import React from 'react'
-import Check from  "./Check"
-const Uni = () => {
+import Check from './Check'
+const Ibtidai = () => {
   return (
-
     <div>
       <Check/>
     </div>
   )
 }
 
-export default Uni
+export default Ibtidai

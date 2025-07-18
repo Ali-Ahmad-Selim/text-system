@@ -18,8 +18,10 @@ const AddStudent = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const groupOptions = ['Hazirlik', 'Ibtidai', 'Ihzari', 'Hafizlik'];
+
   // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -116,21 +118,28 @@ const AddStudent = () => {
           />
         </div>
 
-        {/* Group */}
+        {/* Group Dropdown */}
         <div>
           <label htmlFor="group" className="block text-sm font-medium text-gray-300 mb-1">
             Group *
           </label>
-          <input
-            type="text"
+          <select
             id="group"
             name="group"
             value={formData.group}
             onChange={handleInputChange}
             required
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="e.g., izhari,ibtdai"
-          />
+            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+          >
+            <option value="" disabled className="bg-gray-700 text-gray-400">
+              Select a group
+            </option>
+            {groupOptions.map((group) => (
+              <option key={group} value={group} className="bg-gray-700 text-white hover:bg-gray-600">
+                {group}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Submit Button */}

@@ -1,12 +1,11 @@
 import React from 'react'
-import Check from  "./Check"
-const Hamidiye = () => {
+import Check from './Check'
+const Hazirlik = () => {
   return (
     <div>
-
       <Check/>
     </div>
   )
 }
 
-export default Hamidiye
+export default Hazirlik

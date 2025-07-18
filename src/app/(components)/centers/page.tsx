@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react'
-import Haji from './Haji'
-import Hamidiye from './Hamidiye'
-import Valencia from './Valencia'
-import Uni from './Uni'
-import Vefa from './Vefa'
+import Hafizlik from './Hafizlik';
+import Hazirlik from './Hazirlik';
+import Ibtidai from './Ibtidai';
+import Ihzari from './Ihzari';
+
 
 const Page = () => {
   const [center, setCenter] = useState<string | null>(null);
@@ -33,16 +33,14 @@ const Page = () => {
   const renderCenterComponent = () => {
 
     switch(center) {
-      case 'izhariUni':
-        return <Uni />;
-      case 'Valencia':
-        return <Valencia />;
-      case 'Hamidiye':
-        return <Hamidiye />;
-      case 'Haji Unal':
-        return <Haji />;
-      case 'Vefa':
-        return <Vefa />;
+      case 'Hazirlik':
+        return <Hazirlik />;
+      case 'Ibtidai':
+        return <Ibtidai />;
+      case 'Ihzari':
+        return <Ihzari />;
+      case 'Hafizlik':
+        return <Hafizlik />;
       default:
         return (
           <div className="min-h-screen bg-gray-900 flex items-center justify-center">

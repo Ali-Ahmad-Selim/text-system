@@ -1,6 +1,6 @@
 import React from 'react'
-import Check from  "./Check"
-const Haji = () => {
+import Check from './Check'
+const Hafizlik = () => {
   return (
     <div>
       <Check/>
@@ -8,4 +8,4 @@ const Haji = () => {
   )
 }
 
-export default Haji
+export default Hafizlik

@@ -17,9 +17,7 @@ export default function WelcomePage() {
     router.push("/login");
   };
 
-  const handleSignup = () => {
-    router.push("/signup");
-  };
+ 
 
   useEffect(() => {
     setMounted(true);
@@ -92,9 +90,8 @@ export default function WelcomePage() {
 }
 
 const hostels = [
-  { id: 1, name: "izhariUni" },
-  { id: 2, name: "Valencia" },
-  { id: 3, name: "Hamidiye" },
-  { id: 4, name: "Haji Unal" },
-  { id: 5, name: "Vefa" }
+  { id: 1, name: "Hazirlik" },
+  { id: 2, name: "Ibtidai" },
+  { id: 3, name: "Ihzari" },
+  { id: 4, name: "Hafizlik" },
 ];

@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 
 const historySchema = new mongoose.Schema({
@@ -6,14 +5,17 @@ const historySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  status: {
+  paperTitle: {
     type: String,
-    enum: ['present', 'absent'],
     required: true,
   },
   marks: {
     type: Number,
-    default: null,
+    required: true,
+  },
+  totalMarks: {
+    type: Number,
+    required: true,
   },
 }, { _id: false }); // _id: false prevents auto-id generation for each history item
 
@@ -30,6 +32,8 @@ const studentSchema = new mongoose.Schema({
   group: {
     type: String,
     required: true,
+    enum: ['Hazirlik', 'Ibtidai', 'Ihzari', 'Hafizlik'],
+    trim: true
   },
   history: {
     type: [historySchema],
@@ -37,6 +41,6 @@ const studentSchema = new mongoose.Schema({
   },
 });
 
-const Student= mongoose.models.students || mongoose.model('students', studentSchema);
+const Student = mongoose.models.students || mongoose.model('students', studentSchema);
 
 export default Student;

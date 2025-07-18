@@ -196,7 +196,7 @@ const GetStudent = () => {
         <div className="relative">
           <input
             type="text"
-            placeholder="Search by name, student ID, or roll number..."
+            placeholder="Search by name, student ID, or Group..."
             value={searchTerm}
             onChange={handleSearchChange}
             className="w-full px-4 py-3 pl-10 pr-10 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -254,7 +254,7 @@ const GetStudent = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-white">{student.name}</h3>
                   <p className="text-sm text-gray-300">ID: {student.studentId}</p>
-                  <p className="text-sm text-gray-300">Roll: {student.group}</p>
+                  <p className="text-sm text-gray-300">Group: {student.group}</p>
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -312,7 +312,7 @@ const GetStudent = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Roll Number *</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">Group *</label>
                 <input
                   type="text"
                   name="group"

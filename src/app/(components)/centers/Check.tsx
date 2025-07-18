@@ -46,7 +46,7 @@ const Check = () => {
           if (student) {
             setFoundStudent(student);
             setShowgroupInput(true);
-            setMessage({ type: 'success', text: `Student "${student.name}" found! Please enter your roll number to continue.` });
+            setMessage({ type: 'success', text: `Student "${student.name}" found! Please enter your Group name to continue.` });
           } else {
             setMessage({ type: 'error', text: `Student "${searchName}" does not exist` });
           }
@@ -67,7 +67,7 @@ const Check = () => {
 
   const verifygroup = () => {
     if (!foundStudent || !enteredgroup.trim()) {
-      setMessage({ type: 'error', text: 'Please enter your roll number' });
+      setMessage({ type: 'error', text: 'Please enter your Group' });
       return;
     }
 
@@ -80,24 +80,34 @@ const Check = () => {
         return;
       }
 
-      // Check if entered roll number matches the found student's roll number
+      // Check if entered group matches the found student's group
       if (foundStudent.group === enteredgroup.trim()) {
-        // Also check if it matches the saved center (assuming savedCenter contains roll number)
+        // Also check if it matches the saved center (assuming savedCenter contains group)
         if (savedCenter === enteredgroup.trim()) {
+          // ✅ Store student studentId in localStorage (not _id)
+          localStorage.setItem("student", foundStudent.studentId);
+          
           setMessage({ type: 'success', text: 'Verification successful! Redirecting to papers...' });
           
-          // Redirect to papers page after a short delay
+          // ✅ Create URL with query parameters for name and group
+          const params = new URLSearchParams({
+            name: foundStudent.name,
+            group: foundStudent.group,
+            studentId: foundStudent.studentId
+          });
+          
+          // Redirect to papers page with URL parameters after a short delay
           setTimeout(() => {
-            window.location.href = '/papers';
+            window.location.href = `/papers?${params.toString()}`;
           }, 1500);
         } else {
-          setMessage({ type: 'error', text: 'Roll number does not match your registered center data' });
+          setMessage({ type: 'error', text: 'Group does not match your registered center data' });
         }
       } else {
-        setMessage({ type: 'error', text: 'Incorrect roll number for this student' });
+        setMessage({ type: 'error', text: 'Incorrect Group for this student' });
       }
     } catch (error) {
-      console.error('Error verifying roll number:', error);
+      console.error('Error verifying Group:', error);
       setMessage({ type: 'error', text: 'Error during verification' });
     }
   };
@@ -171,7 +181,7 @@ const Check = () => {
             </p>
           </div>
 
-          {/* Roll Number Input (shown after student is found) */}
+          {/* Group Input (shown after student is found) */}
           {showgroupInput && (
             <div className="mb-4 sm:mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -180,7 +190,7 @@ const Check = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
-                  placeholder="Enter your roll number..."
+                  placeholder="Enter your Group..."
                   value={enteredgroup}
                   onChange={(e) => setEnteredgroup(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -235,6 +245,9 @@ const Check = () => {
                 </p>
                 <p className="text-gray-300">
                   <span className="font-medium">Student ID:</span> {foundStudent.studentId}
+                </p>
+                <p className="text-gray-300">
+                  <span className="font-medium">Group:</span> {foundStudent.group}
                 </p>
               </div>
             </div>
