@@ -417,18 +417,7 @@ const Test: React.FC<TestProps> = ({
           </div>
 
           {/* Answer Input */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Your Answer:
-            </label>
-            <textarea
-              value={answers[currentQuestionIndex]}
-              onChange={(e) => handleAnswerChange(e.target.value)}
-              placeholder="Type your answer here..."
-              rows={4}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-            />
-          </div>
+        
 
           {/* Navigation Buttons */}
           <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
