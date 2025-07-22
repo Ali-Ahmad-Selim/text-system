@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import DashboardContent from './DashboardContent'
+import DashboardContent from '../dashboard/DashboardContent'
 
 // Loading component for the dashboard
 function DashboardSkeleton() {
