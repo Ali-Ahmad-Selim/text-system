@@ -50,7 +50,9 @@ export default function Login() {
 
         // Get role from the correct path: data.data.user.role
         const userRole = data.data.user.role || 'user';
-        window.location.href = `/dashboard?role=${userRole}`;
+        const encodedRole = btoa(userRole); // Base64 encode the role
+window.location.href = `/dashboard?role=${encodedRole}`;
+
       } else {
         setError(data.error || "Login failed");
       }

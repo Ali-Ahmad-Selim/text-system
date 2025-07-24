@@ -60,8 +60,9 @@ const DashboardContent = () => {
       setIsValidating(true)
       
       // Extract role from URL parameters
-      const roleFromUrl = searchParams.get('role')
-      
+const encodedRole = searchParams.get("role");
+const decodedRole = encodedRole ? atob(encodedRole) : null;
+      const roleFromUrl = decodedRole || 'user'; // Default to 'user' if no role provided      
       // Check if role is provided in URL
       if (!roleFromUrl) {
         console.warn('No role specified in URL, defaulting to user')
